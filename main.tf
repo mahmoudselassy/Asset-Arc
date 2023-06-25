@@ -1,7 +1,7 @@
 provider "aws" {
-  access_key = "AKIAW7RN25ENVZHM4Y3A"
-  secret_key = "ajjsV9dgaj9uByRXW3ER7MkFprsDOQxNwD7xeM3N"
-  region     = "us-east-1"  # Update with your desired region
+  access_key = "<ACCESS_KEY>"
+  secret_key = "<SECRET_KEY>"
+  region     = "us-east-1"  
 }
 
 resource "aws_s3_bucket" "assets_bucket" {
@@ -228,7 +228,7 @@ resource "aws_lambda_function" "asset_evaluation_lambda" {
    environment {
     variables = {
       CHATGPT_URL= "https://api.openai.com/v1/chat/completions"
-      CHATGPT_API_KEY = "API_KEY"
+      CHATGPT_API_KEY = "<API_KEY>"
     }
   }
 }
