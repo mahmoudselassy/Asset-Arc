@@ -1,6 +1,6 @@
 provider "aws" {
-  access_key = "ACCESS_KEY"
-  secret_key = "SECRET_KEY"
+  access_key = "AKIAW7RN25ENVZHM4Y3A"
+  secret_key = "ajjsV9dgaj9uByRXW3ER7MkFprsDOQxNwD7xeM3N"
   region     = "us-east-1"  # Update with your desired region
 }
 
@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "assets_bucket" {
 
 resource "aws_sqs_queue" "assets_queue" {
   name = "assets-queue"
-  visibility_timeout_seconds = 900
+  visibility_timeout_seconds = 43200
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq_assets_queue.arn
     maxReceiveCount     = 5  # Maximum number of times a message can be received before being sent to the DLQ
@@ -170,13 +170,14 @@ resource "aws_lambda_function_event_invoke_config" "file_changes_lambda_destinat
       destination = aws_sqs_queue.assets_queue.arn
     }
     on_failure {
-      destination = aws_sqs_queue.assets_queue.arn
+      destination = aws_sqs_queue.dlq_assets_queue.arn
     }
   }
 }
 
 resource "aws_sqs_queue" "dlq_assets_queue" {
   name = "dlq-assets-queue"
+  visibility_timeout_seconds = 43200
 }
 
 resource "aws_lambda_function" "assets_consumer_lambda" {
@@ -198,6 +199,7 @@ resource "aws_lambda_function" "assets_consumer_lambda" {
     }
   }
 
+
   # Add any other required configuration for your Lambda function
 }
 
@@ -211,6 +213,7 @@ resource "aws_iam_role_policy_attachment" "consumer_sqs_policy" {
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   event_source_arn  = aws_sqs_queue.assets_queue.arn
   function_name     = aws_lambda_function.assets_consumer_lambda.function_name
+  batch_size = 1
 }
 
 resource "aws_lambda_function" "asset_evaluation_lambda" {
